@@ -1,6 +1,7 @@
 # Elm Cloudinary
 
 This library provides a user friendly interface to upload your photos to Cloudinary.
+The library is far from complete today, so do not hesitate to post an issue explaining what you want to do, or propose a PR.
 
 ## Examples
 
