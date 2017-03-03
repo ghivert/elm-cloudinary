@@ -20,11 +20,11 @@ install:
   - nvm use $TARGET_NODE_VERSION
   - node --version
   - npm --version
-  - cd test
   - npm install -g elm@$ELM_VERSION
-  - npm install
   - git clone https://github.com/ghivert/elm-cloudinary
+  - cd elm-cloudinary
+  - npm install -g elm-test
   - elm package install --yes
 
 script:
-  - npm test
+  - elm test
