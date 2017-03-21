@@ -13,5 +13,5 @@ all =
       <| \params ->
         Expect.equal
           (Cloudinary.toUrl params.settings params.id)
-          ("http://res.cloudinary.com/" ++ params.settings.username ++ "/image/upload/" ++ params.id)
+          ("https://res.cloudinary.com/" ++ params.settings.username ++ "/image/upload/" ++ params.id)
     ]
