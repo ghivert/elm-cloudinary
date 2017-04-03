@@ -20,98 +20,98 @@ import Html.Attributes as Attributes
 import Json.Decode as Decode
 
 type alias Model =
-    { photoId : Maybe String
-    , uploadError : Maybe String
-    }
+  { photoId : Maybe String
+  , uploadError : Maybe String
+  }
 
 type Msg
-    = ImageSelected String
-    | ImageRead String
-    | ImageUploaded (Result Http.Error String)
+  = ImageSelected String
+  | ImageRead String
+  | ImageUploaded (Result Http.Error String)
 
 type alias CloudinarySettings =
-    { username : String
-    , apiKey : String
-    , timestamp : Int
-    , signature : String
-    }
+  { username : String
+  , apiKey : String
+  , timestamp : Int
+  , signature : String
+  }
 
 port imageSelected : String -> Cmd msg
 port imageRead : (String -> msg) -> Sub msg
 
 main : Program Never Model Msg
 main =
-    Html.program
-        { init = init
-        , update = update
-        , subscriptions = subscriptions
-        , view = view
-        }
+  Html.program
+    { init = init
+    , update = update
+    , subscriptions = subscriptions
+    , view = view
+    }
 
 defaultModel : Model
 defaultModel =
-    { photoId = Nothing
-    , uploadError = Nothing
-    }
+  { photoId = Nothing
+  , uploadError = Nothing
+  }
 
 init : ( Model, Cmd Msg )
 init =
-    ( defaultModel, Cmd.none )
+  ( defaultModel, Cmd.none )
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        ImageSelected id ->
-            ( model, imageSelected id )
+  case msg of
+    ImageSelected id ->
+      ( model, imageSelected id )
 
-        ImageRead photo ->
-            ( model
-            , Cloudinary.uploadPhoto
-                { username = "sample"
-                , apiKey = "apiKeySample"
-                , timestamp = 1488376411
-                , signature = "signatureSample"
-                } ImageUploaded photo
-            )
+    ImageRead photo ->
+      ( model
+      , Cloudinary.uploadPhoto
+        { username = "sample"
+        , apiKey = "apiKeySample"
+        , timestamp = 1488376411
+        , signature = "signatureSample"
+        } ImageUploaded photo
+      )
 
-        ImageUploaded photoId ->
-            case photoId of
-                Err error ->
-                    ( { model | uploadError = Just <| toString <| error }, Cmd.none )
+    ImageUploaded photoId ->
+      case photoId of
+        Err error ->
+          ( { model | uploadError = Just <| toString <| error }, Cmd.none )
 
-                Ok id ->
-                    ( { model | photoId = Just id }, Cmd.none )
+        Ok id ->
+          ( { model | photoId = Just id }, Cmd.none )
 
-                    view : Model -> Html Msg
-                    view model =
-                        Html.div []
-                            [ Html.div
-                                [ Attributes.style [ ( "text-align", "center" ), ( "padding", "100px" ) ] ]
-                                [ case model.photoId of
-                                    Nothing ->
-                                        Html.form []
-                                            [ Html.input
-                                                [ Attributes.name "file"
-                                                , Attributes.type_ "file"
-                                                , Attributes.id "cloudinary-uploader"
-                                                , Events.on "change"
-                                                    <| Decode.succeed
-                                                    <| ImageUpload
-                                                    <| ImageSelected "cloudinary-uploader"
-                                                ]
-                                                []
-                                            ]
+view : Model -> Html Msg
+view model =
+  Html.div []
+    [ Html.div
+      [ Attributes.style [ ( "text-align", "center" ), ( "padding", "100px" ) ] ]
+      [ case model.photoId of
+        Nothing ->
+          Html.form []
+            [ Html.input
+              [ Attributes.name "file"
+              , Attributes.type_ "file"
+              , Attributes.id "cloudinary-uploader"
+              , Events.on "change"
+                <| Decode.succeed
+                <| ImageUpload
+                <| ImageSelected "cloudinary-uploader"
+              ]
+              []
+            ]
 
-                                    Just id ->
-                                        Html.img
-                                            [ Attributes.src ("https://res.cloudinary.com/username/image/upload/" ++ id) ]
-                                            []
-                                ]
-                            ]
+        Just id ->
+          Html.img
+            [ Attributes.src ("https://res.cloudinary.com/username/image/upload/" ++ id) ]
+            []
+      ]
+    ]
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    imageRead (ImageUpload << ImageRead)
+  imageRead (ImageUpload << ImageRead)
 ```
 
 **ports.js**

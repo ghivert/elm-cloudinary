@@ -12,7 +12,7 @@ module Cloudinary exposing
 # Upload
 @docs uploadPhoto
 
-# Access Upload Images
+# Access Uploaded Images
 @docs toUrl
 
 -}
@@ -38,25 +38,25 @@ type alias Settings =
   }
 
 
-{-| Upload the photo provided into parameter, and returns it's public ID. At the moment, only the public ID is returned, but it can be improved in a near future.
+{-| Upload the photo provided into parameter, and returns it's public ID.
+At the moment, only the public ID is returned, but it can be improved in a near future.
 uploadPhoto accepts any file, encoded in base64. You can get it easily via ports for your uploads. -}
 uploadPhoto : Settings -> (Result Http.Error String -> msg) -> String -> Cmd msg
-uploadPhoto settings msg_ file =
-  Http.send msg_
-    <| upload (uploadUrl settings.username) decodeResponse
-    <| encodeUploadBody settings.apiKey settings.timestamp settings.signature
-    <| file
+uploadPhoto ({ username } as settings) msg =
+  Http.send msg
+    << upload (uploadUrl username) decodeResponse
+    << encodeUploadBody settings
 
 upload : Url -> Decoder String -> Http.Body -> Http.Request String
-upload baseUrl decoder body =
-  Http.post baseUrl body decoder
+upload baseUrl =
+  flip (Http.post baseUrl)
 
 uploadUrl : String -> String
 uploadUrl username =
   "https://api.cloudinary.com/v1_1/" ++ username ++ "/auto/upload"
 
-encodeUploadBody : String -> Int -> String -> String -> Http.Body
-encodeUploadBody apiKey timestamp signature file =
+encodeUploadBody : Settings -> String -> Http.Body
+encodeUploadBody { apiKey, timestamp, signature } file =
   Http.jsonBody <|
     Encode.object
       [ ( "file", Encode.string file )
@@ -69,7 +69,8 @@ decodeResponse : Decoder Id
 decodeResponse =
   Decode.field "public_id" Decode.string
 
-{-| Access the uploaded photo on Cloudinary servers. Provide the ID to get the access link. Does not handle transformation on the fly for the moment. -}
+{-| Access the uploaded photo on Cloudinary servers. Provide the ID to get the
+access link. Does not handle transformation on the fly for the moment. -}
 toUrl : Settings -> Id -> Url
 toUrl { username } id =
   "https://res.cloudinary.com/" ++ username ++ "/image/upload/" ++ id
