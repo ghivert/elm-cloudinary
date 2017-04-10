@@ -1,6 +1,7 @@
 module Cloudinary exposing
   ( Settings
   , uploadPhoto
+  , trackUploadPhoto
   , toUrl
   )
 
@@ -11,6 +12,7 @@ module Cloudinary exposing
 
 # Upload
 @docs uploadPhoto
+@docs trackUploadPhoto
 
 # Access Uploaded Images
 @docs toUrl
@@ -18,6 +20,7 @@ module Cloudinary exposing
 -}
 
 import Http
+import Http.Progress as Progress
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 
@@ -46,6 +49,16 @@ uploadPhoto ({ username } as settings) msg =
   Http.send msg
     << upload (uploadUrl username) decodeResponse
     << encodeUploadBody settings
+
+{-| Upload the photo provided into parameter, and returns it's public ID.
+trackUploadPhoto accepts any file, encoded in base64. You can get it easily via ports for your uploads.
+trackUploadPhoto allows to track the HTTP transfer. You should provide a msg to get those informations. -}
+trackUploadPhoto : Settings -> (Progress.Progress String -> msg) -> String -> Sub msg
+trackUploadPhoto ({ username } as settings) msg =
+  let url = uploadUrl username in
+  encodeUploadBody settings
+    >> upload url decodeResponse
+    >> Progress.track url msg
 
 upload : Url -> Decoder String -> Http.Body -> Http.Request String
 upload baseUrl =
